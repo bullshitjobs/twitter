@@ -60,7 +60,7 @@ my $options = {
 ###################################################
 
 my $credentials = do('./credentials.pl');
-die color('magenta') . dateTime() . color('reset') . ' No credentials found for user: ' . $twitterUser . '. Aborting ...' . "\n" if !defined $credentials->{$twitterUser};
+die dateTime() . ' No credentials found for user: ' . $twitterUser . '. Aborting ...' . "\n" if !defined $credentials->{$twitterUser};
 $credentials = $credentials->{$twitterUser};
 
 my $client = Twitter::API->new_with_traits(
