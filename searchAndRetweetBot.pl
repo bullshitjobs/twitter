@@ -59,7 +59,7 @@ my $options = {
 ### load authentication credentials from config ###
 ###################################################
 
-my $credentials = do('./credentials.pl');
+my $credentials = do('./searchAndRetweetBotConfig.pl');
 die dateTime() . ' No credentials found for user: ' . $twitterUser . '. Aborting ...' . "\n" if !defined $credentials->{$twitterUser};
 $credentials = $credentials->{$twitterUser};
 
