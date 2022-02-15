@@ -156,7 +156,7 @@ sub isaGoodTweet {
   $tweetTextShort =~ s/(bullshit[\s\-\_]jobs)/color('magenta') . $1 . color('reset')/ige;
   $tweetTextShort =~ s/(bullshitjobs)/color('magenta') . $1 . color('reset')/ige;
   my $tweetTextShortPrint = $tweetTextShort;
-  $tweetTextShortPrint =~ s/\R//g;
+  $tweetTextShortPrint =~ s/\R/ /g;
   
   print '[' . color('cyan') . scalar(localtime($unixTime)) . color('reset') . '] ';
   print $tweetUrlPrint . ' 'x(64-length($tweetUrl)) . ' | ';
