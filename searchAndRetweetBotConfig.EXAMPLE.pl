@@ -1,20 +1,20 @@
 {
   'bot123' => { 
-    consumer_key        => 'Your API Key ...',
-    consumer_secret     => 'Your API Secret ...',
-    access_token        => 'Your Access Token ...',
-    access_token_secret => 'Your Access Secret ...',
+    consumer_key        => 'Y<API Key>',
+    consumer_secret     => '<API Secret>',
+    access_token        => '<Access Token>',
+    access_token_secret => '<Access Secret>',
   },
   'anotherbot' => {
-    consumer_key        => 'asdf', 
-    consumer_secret     => 'qwert',
-    access_token        => 'top',
-    access_token_secret => 'secret',
+    consumer_key        => '<API Key>', 
+    consumer_secret     => '<API Secret>',
+    access_token        => '<Access Token>',
+    access_token_secret => '<Access Secret>',
   },
   'BennyBunny' => {
-    consumer_key        => '', 
-    consumer_secret     => '',
-    access_token        => '',
-    access_token_secret => '',
+    consumer_key        => '<API Key>', 
+    consumer_secret     => '<API Secret>',
+    access_token        => '<Access Token>',
+    access_token_secret => '<Access Secret>',
   },
 };
