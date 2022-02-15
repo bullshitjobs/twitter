@@ -47,7 +47,7 @@ if($profile eq 'pop'){
 ### search parameters ###
 #########################
 
-my $q = '#bullshitjobs OR bullshitjobs OR bullshit+jobs OR bullshit-jobs OR bullshit_jobs min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites;
+my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "bullshit_jobs" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets AND -filter:replies';
 
 my $options = {
   q          => $q,
@@ -75,8 +75,7 @@ my $client = Twitter::API->new_with_traits(
 while(1){
 
   my $tweetIds = searchForTweets($options);
-  print dateTime() . ' Found ' . color('yellow') . scalar(keys(%{$tweetIds})) . color('reset') . ' potential tweets.' . "\n";
-
+ 
   #
   # The results from 'search/tweets' calls do not actually have the .retweeted field set. It's always false/0.
   # This is most likely to prevent search complexity explosions and we need to be doing 'statuses/lookup' calls
@@ -89,7 +88,7 @@ while(1){
   #
 
   my $tweetIdsToRetweet = filterRetweeted($tweetIds);
-  print dateTime() . ' Retweeting ' . color('yellow') . scalar(keys(%{$tweetIdsToRetweet})) . color('reset') . ' tweets.' . "\n";
+  print dateTime() . ' Found ' . color('yellow') . scalar(keys(%{$tweetIds})) . color('reset') . ' potential tweets. Retweeting ' . color('yellow') . scalar(keys(%{$tweetIdsToRetweet})) . color('reset') . ' of them.' . "\n";
   retweetAction($tweetIdsToRetweet);
   
   print dateTime() . ' Sleeping for ' . color('yellow') . $interval . color('reset') . ' seconds. (Next run sheduled for ' . dateTime(time() + $interval) . ')' . "\n";
@@ -150,9 +149,12 @@ sub isaGoodTweet {
   my $name = $tweet->{'user'}->{'screen_name'};
   $name = color('yellow') . $name . color('reset') if $tweet->{'user'}->{'verified'};
   
-  my $tweetTextShort = substr($tweetText, 0, 128);
+  my $tweetTextShort = substr($tweetText, 0, 160);
   $tweetTextShort =~ s/(^|[^@\w])(@(?:\w{1,15}))\b/$1 . color('magenta') . $2 . color('reset')/ige;
   $tweetTextShort =~ s/(^|[^#\w])(#(?:\w{1,128}))\b/$1 . color('cyan') . $2 . color('reset')/ige;
+  $tweetTextShort =~ s/(david[\s\-\_]graeber)/color('yellow') . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(bullshit[\s\-\_]jobs)/color('magenta') . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(bullshitjobs)/color('magenta') . $1 . color('reset')/ige;
   my $tweetTextShortPrint = $tweetTextShort;
   $tweetTextShortPrint =~ s/\R//g;
   
