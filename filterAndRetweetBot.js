@@ -101,7 +101,7 @@ stream.on('tweet', function (tweet) {
         if (err) {
           console.log('Error: ' + err.message);
         } else {
-          console.log('Success: ' + tweet.id_str);
+          //console.log('Success: ' + tweet.id_str);
         }
       }
       // </retweet> //
@@ -122,7 +122,7 @@ stream.on('tweet', function (tweet) {
 	  	  }else if (err) {
           console.log('Error: ' + err.message);
         } else {
-          console.log('Success: ' + tweet.id_str);
+          //console.log('Success: ' + tweet.id_str);
         }
 	    }
 	    // </like> //
