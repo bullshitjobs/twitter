@@ -3,6 +3,9 @@ var Twit = require('twit')
 var config = require('./filterAndRetweetBotConfig.js')
 var T = new Twit(config)
 
+//////////////
+// API call //
+//////////////
 var stream = T.stream('statuses/filter', { track: '#bullshitjobs, bullshitjobs,"bullshit jobs", "bullshit-jobs", "bullshit_jobs", #davidgraeber, davidgraeber, "david graeber"' })
 
 stream.on('limit', function (limitMessage) {
