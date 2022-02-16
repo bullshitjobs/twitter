@@ -23,16 +23,9 @@ stream.on('tweet', function (tweet) {
   if(typeof tweet.retweeted_status !== 'undefined'){ return 1; }
   if(tweet.lang != 'en')                           { return 1; }
   if(tweet.user.followers_count < 2000)            { return 1; }
-  
-  /*
-  var quoted = tweet.is_quote_status ? ' QUOTED' : '';
-  if(tweet.in_reply_to_status_id_str !== null){
-  	console.log('REPLY' + quoted);
-  }else{
-  	console.log('REGULAR ' + quoted);
-  }
 
-  */
+  // see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
+  // see: https://github.com/twitter/twitter-text/tree/master/js
   const usernamesRegex = new RegExp(/(^|[^\w@/\!?=&])@(\w{1,15})\b/, 'g');
   var tweetTextNoUsers  = tweetText.replace(usernamesRegex, '');
 
@@ -74,22 +67,22 @@ stream.on('tweet', function (tweet) {
     
     var screenName = tweet.user.screen_name;
     if(tweet.user.verified){
-    	screenName = screenName.yellow;
+      screenName = screenName.yellow;
     }
     
     var reaction = 'NONE   ';
     if(bullshitjobsMatches){
       reaction   = 'RETWEET'.magenta;
     }else if(davidGraeberMatches){
-    	reaction   = 'LIKE   '.cyan;
+      reaction   = 'LIKE   '.cyan;
     }
-  	
-  	var out  = '[' + tweet.created_at.cyan + '] ';
-  	    out += reaction + ' | '
-  	    out += tweetUrlPrint + ' '.repeat(64-tweetUrl.length) + ' | ';
-  	    out += ' '.repeat(16-tweet.user.screen_name.length) + tweet.user.screen_name + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
-  	    out += tweetTextShortPrint;
-  	console.log(out);
+    
+    var out  = '[' + tweet.created_at.cyan + '] ';
+        out += reaction + ' | '
+        out += tweetUrlPrint + ' '.repeat(64-tweetUrl.length) + ' | ';
+        out += ' '.repeat(16-tweet.user.screen_name.length) + tweet.user.screen_name + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
+        out += tweetTextShortPrint;
+    console.log(out);
         
     if(bullshitjobsMatches > 0){
       
@@ -111,27 +104,27 @@ stream.on('tweet', function (tweet) {
       ////////////////
       
     }else if(davidGraeberMatches > 0){
-    	
-    	////////////
-    	// <like> //
+      
+      ////////////
+      // <like> //
 
-    	///////////////
-    	/// API call //
-    	///////////////
-    	T.post('favorites/create', { id: tweet.id_str }, liked)
-	    function liked(err, data, response) {
-	  	  if(err === undefined && data == ''){
-  	  		console.log('RATE LIMIT!');
-	  	  }else if (err) {
+      ///////////////
+      /// API call //
+      ///////////////
+      T.post('favorites/create', { id: tweet.id_str }, liked)
+      function liked(err, data, response) {
+        if(err === undefined && data == ''){
+          console.log('RATE LIMIT!');
+        }else if (err) {
           console.log('Error: ' + err.message);
         } else {
           //console.log('Success: ' + tweet.id_str);
         }
-	    }
-	    // </like> //
-	    /////////////
-	  
-	  }
+      }
+      // </like> //
+      /////////////
+    
+    }
 
   }
 })
