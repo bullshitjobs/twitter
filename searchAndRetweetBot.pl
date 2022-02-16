@@ -104,10 +104,10 @@ sub searchForTweets {
   my $max_id   = undef;
   my $ids      = {};
   do {
-  	if(defined $max_id){
+    if(defined $max_id){
       $options->{'max_id'} = $max_id;
     }else{
-    	delete $options->{'max_id'};
+      delete $options->{'max_id'};
     }
     print dateTime() . ' max_id: ' . color('yellow') . (defined($max_id) ? $max_id : 'most recent' ) . color('reset') . '.' . "\n";
  

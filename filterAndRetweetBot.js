@@ -13,7 +13,8 @@ var T = new Twit(config)
 //////////////
 // API call //
 //////////////
-var stream = T.stream('statuses/filter', { track: '#bullshitjobs, bullshitjobs,"bullshit jobs", "bullshit-jobs", "bullshit_jobs", #davidgraeber, davidgraeber, "david graeber"' })
+var stream = T.stream('statuses/filter', { track: 'bullshitjobs, bullshit jobs, davidgraeber, david graeber' }); // the streaming app does not seem to support quoted search phrases
+//var stream = T.stream('statuses/filter', { track: '#bullshitjobs, bullshitjobs, "bullshit jobs", "bullshit-jobs", "bullshit_jobs", #davidgraeber, davidgraeber, "david graeber"' }); // this will use all the --->"<--- characters as part of the search phrase. :-(
 
 stream.on('limit', function (limitMessage) {
   console.log(JSON.stringify(limitMessage))
@@ -26,7 +27,7 @@ stream.on('disconnect', function (disconnectMessage) {
 stream.on('tweet', function (tweet) {
   
   var tweetText = typeof tweet.extended_tweet !== 'undefined' ? tweet.extended_tweet.full_text : tweet.text;
- 
+
   if(typeof tweet.retweeted_status !== 'undefined'){ return 1; }
   if(tweet.lang != 'en')                           { return 1; }
   if(tweet.user.followers_count < 2000)            { return 1; }
@@ -78,9 +79,9 @@ stream.on('tweet', function (tweet) {
     }
     
     var reaction = 'NONE   ';
-    if(bullshitjobsMatches){
+    if(bullshitjobsMatches > 0){
       reaction   = 'RETWEET'.magenta;
-    }else if(davidGraeberMatches){
+    }else if(davidGraeberMatches > 0){
       reaction   = 'LIKE   '.cyan;
     }
     
