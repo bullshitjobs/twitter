@@ -1,3 +1,10 @@
+#!/usr/bin/node
+//
+// A simple Twitter bot that uses the 'statuses/filter' Twitter API endpoint
+// in order to retweet tweets from users with enough followers.
+//
+// TODO: API Error handling.
+// 
 var colors = require('colors')
 var Twit = require('twit')
 var config = require('./filterAndRetweetBotConfig.js')
