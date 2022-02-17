@@ -153,7 +153,7 @@ sub isaGoodTweet {
            
   # see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
   # see: https://github.com/twitter/twitter-text/tree/master/js      
-  $tweetTextShort =~ s/(^|[^\w@\/\!?=&])(@\w{1,15})\b/$1 . color('magenta') . $2 . color('reset')/ige;
+  $tweetTextShort =~ s/(^|[^\w@\/\!?=&])(@\w{1,15})\b/$1 .  color('cyan') . $2 . color('reset')/ige;
   $tweetTextShort =~ s/(^^|[^\w#\/\!?=&])(#\w{1,15})\b/$1 . color('cyan') . $2 . color('reset')/ige;
   
   $tweetTextShort =~ s/(climate(?:[\s\-\_])?change)/color('green')  . $1 . color('reset')/ige;

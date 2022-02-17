@@ -13,7 +13,7 @@ var T = new Twit(config)
 //////////////
 // API call //
 //////////////
-var stream = T.stream('statuses/filter', { track: 'bullshitjobs, bullshit jobs, davidgraeber, david graeber' }); // the streaming app does not seem to support quoted search phrases
+var stream = T.stream('statuses/filter', { track: 'climatechange, climate change, bullshitjobs, bullshit jobs, davidgraeber, david graeber' }); // the streaming app does not seem to support quoted search phrases
 
 stream.on('limit', function (limitMessage) {
   console.log(JSON.stringify(limitMessage))
@@ -49,7 +49,7 @@ stream.on('tweet', function (tweet) {
   if(bullshitjobsRegex1.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
   if(davidGraeberRegex1.test(tweetTextNoUsers)){ davidGraeberMatches++; }
 
-  if(bullshitjobsMatches > 0 || davidGraeberMatches > 0){
+  if(bullshitjobsMatches > 0 || davidGraeberMatches > 0 || climateMatches > 0){
 
     var tweetUrl      = 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
     var tweetUrlPrint = 'https://twitter.com/' + tweet.user.screen_name.magenta + '/status/' + tweet.id_str.yellow;
@@ -67,7 +67,7 @@ stream.on('tweet', function (tweet) {
     }  
 
     var tweetTextShort = tweetText.substr(0, 160);  
-    tweetTextShort = tweetTextShort.replace(usernamesRegex,     function(m){ return colors.magenta(m); });
+    tweetTextShort = tweetTextShort.replace(usernamesRegex,     function(m){ return colors.cyan(m); });
     tweetTextShort = tweetTextShort.replace(hashTagRegex,       function(m){ return colors.cyan(m);    });
     tweetTextShort = tweetTextShort.replace(climateRegex1,      function(m){ return colors.green(m);   });
     tweetTextShort = tweetTextShort.replace(bullshitjobsRegex1, function(m){ return colors.magenta(m); });
