@@ -149,7 +149,20 @@ sub isaGoodTweet {
   my $name = $tweet->{'user'}->{'screen_name'};
   $name = color('yellow') . $name . color('reset') if $tweet->{'user'}->{'verified'};
   
-  my $tweetTextShort = substr($tweetText, 0, 160);
+  my $tweetType  = color('green') . 'T' . color('reset');
+  if(defined $tweet->{'in_reply_to_status_id_str'}){
+    $tweetType = color('yellow') . '@' . color('reset');
+  }elsif(defined $tweet->{'retweeted_status'}){
+    $tweetType = color('magenta') . 'R' . color('reset');
+  }
+  my $quotedStatus = ' ';   
+  if(JSON::is_bool($tweet->{'is_quote_status'}) && $tweet->{'is_quote_status'} == JSON::true){
+    $quotedStatus = color('cyan') . 'Q' . color('reset');
+  }
+
+  my $numberOfUsersMentioned = scalar(@{$tweet->{'entities'}->{'user_mentions'}});
+
+  my $tweetTextShort = substr($tweetText, 0, 155);
            
   # see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
   # see: https://github.com/twitter/twitter-text/tree/master/js      
@@ -161,12 +174,14 @@ sub isaGoodTweet {
   $tweetTextShort =~ s/(david(?:[\s\-\_])?graeber)/color('yellow')  . $1 . color('reset')/ige;
   
   my $tweetTextShortPrint = $tweetTextShort;
-  $tweetTextShortPrint =~ s/\R/ /g;
+  $tweetTextShortPrint =~ s/\R/\\/g;
   
   print '[' . color('cyan') . scalar(localtime($unixTime)) . color('reset') . '] ';
-  print $tweetUrlPrint . ' 'x(64-length($tweetUrl)) . ' | ';
+  print $tweetUrlPrint . ' 'x(64- length($tweetUrl)) . ' | ';
   print 'R: ' . ' 'x(8 - length($tweet->{'retweet_count'})) . $retweetCount . ' L:' . ' 'x(8 - length($tweet->{'favorite_count'})) . $favoriteCount . ' | ';
   print ' 'x(16 - length($tweet->{'user'}->{'screen_name'})) . $name . ' (' . ' 'x(8 - length($tweet->{'user'}->{'followers_count'})) . $tweet->{'user'}->{'followers_count'} . ') | ';
+  print $tweetType . $quotedStatus . ' | ';
+  print ' 'x(2- length($numberOfUsersMentioned)) . $numberOfUsersMentioned . ' | ';
   print $tweetTextShortPrint;
   print "\n";
   

@@ -26,7 +26,6 @@ stream.on('disconnect', function (disconnectMessage) {
 stream.on('tweet', function (tweet) {
   
   var tweetText = typeof tweet.extended_tweet !== 'undefined' ? tweet.extended_tweet.full_text : tweet.text;
-  //tweetText = utf8.encode(tweetText);
   tweetText = Buffer.from(tweetText, 'utf-8').toString();
 
   if(typeof tweet.retweeted_status !== 'undefined'){ return 1; }
@@ -53,8 +52,8 @@ stream.on('tweet', function (tweet) {
 
   if(bullshitjobsMatches > 0 || davidGraeberMatches > 0 || climateMatches > 0){
 
-    var tweetUrl      = 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
-    var tweetUrlPrint = 'https://twitter.com/' + tweet.user.screen_name.magenta + '/status/' + tweet.id_str.yellow;
+    const unixTime = Date.parse(tweet.created_at);
+    const dateObject = new Date(unixTime);
 
     var reaction = 'NONE   ';
     if(bullshitjobsMatches > 0){
@@ -62,13 +61,29 @@ stream.on('tweet', function (tweet) {
     }else if(davidGraeberMatches > 0){
       reaction   = 'LIKE   '.cyan;
     }
-  
+
+    var tweetUrl      = 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
+    var tweetUrlPrint = 'https://twitter.com/' + tweet.user.screen_name.magenta + '/status/' + tweet.id_str.yellow;
+
     var screenName = tweet.user.screen_name;
     if(tweet.user.verified){
       screenName = screenName.yellow;
     }  
 
-    var tweetTextShort = tweetText.substr(0, 160);  
+    var tweetType = 'T'.green;
+    if(tweet.in_reply_to_status_id_str !== null){
+      tweetType   = '@'.yellow;
+    }else if(typeof tweet.retweeted_status !== 'undefined'){
+      tweetType   = 'R'.magenta;
+    }
+    var quotedStatus = ' ';
+    if(tweet.is_quote_status){
+      quotedStatus   = 'Q'.cyan;
+    }
+    //console.log(tweet.entities);
+    var numberOfUsersMentioned = tweet.entities.user_mentions.length.toString();
+
+    var tweetTextShort = tweetText.substr(0, 185);
     tweetTextShort = tweetTextShort.replace(usernamesRegex,     function(m){ return colors.cyan(m);    });
     tweetTextShort = tweetTextShort.replace(hashTagRegex,       function(m){ return colors.cyan(m);    });
     tweetTextShort = tweetTextShort.replace(climateRegex1,      function(m){ return colors.green(m);   });
@@ -76,12 +91,19 @@ stream.on('tweet', function (tweet) {
     tweetTextShort = tweetTextShort.replace(davidGraeberRegex1, function(m){ return colors.yellow(m);  });
     
     const newlineRegex = new RegExp(/\r?\n|\r/, 'g')
-    var tweetTextShortPrint = tweetTextShort.replace(newlineRegex, ' ');
+    var tweetTextShortPrint = tweetTextShort.replace(newlineRegex, '\\');
 
-    var out  = '[' + tweet.created_at.cyan + '] ';
-        out += reaction + ' | '
+    var out  = '[' + dateObject.toLocaleString(
+      undefined, {
+        hour:   '2-digit',
+        minute: '2-digit',
+      }
+    ).cyan + '] ';
+        out += reaction + ' | ';
         out += tweetUrlPrint + ' '.repeat(64-tweetUrl.length) + ' | ';
         out += ' '.repeat(16-tweet.user.screen_name.length) + screenName + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
+        out += tweetType + quotedStatus + ' | ';
+        out += numberOfUsersMentioned.padStart(2, ' ') + ' | ';
         out += tweetTextShortPrint;
     console.log(out);
     
