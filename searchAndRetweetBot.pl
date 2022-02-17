@@ -47,7 +47,8 @@ if($profile eq 'pop'){
 ### search parameters ###
 #########################
 
-my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "bullshit_jobs" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets AND -filter:replies';
+my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "bullshit_jobs" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets'; ### testing
+###my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "bullshit_jobs" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets AND -filter:replies';
 
 my $options = {
   q          => $q,
@@ -115,6 +116,7 @@ sub searchForTweets {
     ### API call ###
     ################
     my $chunk = $client->get('search/tweets', $options);
+    sleep(5); # Don't hammer the API ...
     
     foreach my $tweet (@{$chunk->{'statuses'}}){
       $ids->{$tweet->{'id_str'}}++ if isaGoodTweet($tweet);
@@ -129,7 +131,7 @@ sub isaGoodTweet {
   
   return 0 if $tweet->{'retweet_count'} < $min_retweets && $tweet->{'favorite_count'} < $min_favorites;
   return 0 if defined $tweet->{'retweeted_status'};
-  return 0 if defined $tweet->{'in_reply_to_status_id_str'};
+  ###return 0 if defined $tweet->{'in_reply_to_status_id_str'}; ###testing <-----------------------------------------------------------------------------------------------------------------
   return 0 if $tweet->{'lang'} ne 'en';
   
   my $tweetText = defined $tweet->{'retweeted_status'} ? $tweet->{'retweeted_status'}->{'full_text'} : $tweet->{'full_text'};  
@@ -201,6 +203,7 @@ sub filterRetweeted {
     ### API call ###
     ################
     my $chunk = $client->get('statuses/lookup', { trim_user => 1, id => join(',', @tmp) });
+    sleep(5); # Don't hammer the API ...
     
     foreach my $tweet (@{$chunk}){
       $filteredIds->{$tweet->{'id_str'}}++ if JSON::is_bool($tweet->{'retweeted'}) && $tweet->{'retweeted'} == JSON::false;
@@ -218,8 +221,8 @@ sub retweetAction {
     ### API call ###
     ################
     my $chunk = $client->post('statuses/retweet/' . $id);
-    
     sleep(5); # Don't hammer the API ...
+    
   }
 }
 
