@@ -47,7 +47,7 @@ if($profile eq 'pop'){
 ### search parameters ###
 #########################
 
-my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "nonsense employment" OR "nonsense-employment" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets'; ### testing
+my $q = 'bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "nonsense employment" OR "nonsense-employment" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets'; ### testing
 ###my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "bullshit_jobs" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets AND -filter:replies';
 
 my $options = {
