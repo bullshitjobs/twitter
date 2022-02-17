@@ -13,7 +13,7 @@ var T = new Twit(config);
 //////////////
 // API call //
 //////////////
-var stream = T.stream('statuses/filter', { track: 'climatechange, climate change, bullshitjobs, bullshit jobs, davidgraeber, david graeber' }); // the streaming app does not seem to support quoted search phrases
+var stream = T.stream('statuses/filter', { track: 'climatechange, climate change, bullshitjobs, bullshit jobs, nonsense employment, davidgraeber, david graeber' }); // the streaming app does not seem to support quoted search phrases
 
 stream.on('limit', function (limitMessage) {
   console.log(JSON.stringify(limitMessage));
@@ -37,9 +37,10 @@ stream.on('tweet', function (tweet) {
   const usernamesRegex     = new RegExp(/(^|[^\w@/\!?=&])@(\w{1,15})\b/, 'ig');
   const hashTagRegex       = new RegExp(/(^|[^\w#/\!?=&])#(\w{1,15})\b/, 'ig');  
 
-  const climateRegex1      = new RegExp(/(climate(?:[\s\_\-])?change)/,  'ig');
-  const bullshitjobsRegex1 = new RegExp(/(bullshit(?:[\s\_\-])?jobs)/,   'ig');
-  const davidGraeberRegex1 = new RegExp(/(david(?:[\s\_\-])?graeber)/,   'ig');
+  const climateRegex1      = new RegExp(/(climate(?:[\s\-])?change)/,  'ig');
+  const bullshitjobsRegex1 = new RegExp(/(bullshit(?:[\s\-])?jobs)/,   'ig');
+  const bullshitjobsRegex2 = new RegExp(/(nonsense[\s\-]employment)/,  'ig');
+  const davidGraeberRegex1 = new RegExp(/(david(?:[\s\-])?graeber)/,   'ig');
   
   var tweetTextNoUsers = tweetText.replace(usernamesRegex, '');
   
@@ -48,6 +49,7 @@ stream.on('tweet', function (tweet) {
   var davidGraeberMatches = 0;
   if(     climateRegex1.test(tweetTextNoUsers)){      climateMatches++; }
   if(bullshitjobsRegex1.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
+  if(bullshitjobsRegex2.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
   if(davidGraeberRegex1.test(tweetTextNoUsers)){ davidGraeberMatches++; }
 
   if(bullshitjobsMatches > 0 || davidGraeberMatches > 0 || climateMatches > 0){
@@ -88,6 +90,7 @@ stream.on('tweet', function (tweet) {
     tweetTextShort = tweetTextShort.replace(hashTagRegex,       function(m){ return colors.cyan(m);    });
     tweetTextShort = tweetTextShort.replace(climateRegex1,      function(m){ return colors.green(m);   });
     tweetTextShort = tweetTextShort.replace(bullshitjobsRegex1, function(m){ return colors.magenta(m); });
+    tweetTextShort = tweetTextShort.replace(bullshitjobsRegex2, function(m){ return colors.magenta(m); });
     tweetTextShort = tweetTextShort.replace(davidGraeberRegex1, function(m){ return colors.yellow(m);  });
     
     const newlineRegex = new RegExp(/\r?\n|\r/, 'g')

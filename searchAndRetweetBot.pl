@@ -47,7 +47,7 @@ if($profile eq 'pop'){
 ### search parameters ###
 #########################
 
-my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "bullshit_jobs" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets'; ### testing
+my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "nonsense employment" OR "nonsense-employment" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets'; ### testing
 ###my $q = '#bullshitjobs OR bullshitjobs OR "bullshit jobs" OR "bullshit-jobs" OR "bullshit_jobs" min_retweets:' . $min_retweets . ' OR min_faves:' . $min_favorites . ' -filter:retweets AND -filter:replies';
 
 my $options = {
@@ -136,8 +136,9 @@ sub isaGoodTweet {
   
   my $tweetText = defined $tweet->{'retweeted_status'} ? $tweet->{'retweeted_status'}->{'full_text'} : $tweet->{'full_text'};  
   my $matches = 0;
-  $matches++ if $tweetText =~ /bullshit[\s\_\-]jobs/i;
-  $matches++ if $tweetText =~ /#bullshitjobs/i;
+  $matches++ if $tweetText =~ /bullshit(?:[\s\-])?jobs/i;
+  $matches++ if $tweetText =~ /nonsense[\s\-]employment/i;
+  
   return 0 if $matches < 1;
 
   # We found a potential tweet!
@@ -171,9 +172,10 @@ sub isaGoodTweet {
   $tweetTextShort =~ s/(^|[^\w@\/\!?=&])(@\w{1,15})\b/$1 .  color('cyan') . $2 . color('reset')/ige;
   $tweetTextShort =~ s/(^^|[^\w#\/\!?=&])(#\w{1,15})\b/$1 . color('cyan') . $2 . color('reset')/ige;
   
-  $tweetTextShort =~ s/(climate(?:[\s\-\_])?change)/color('green')  . $1 . color('reset')/ige;
-  $tweetTextShort =~ s/(bullshit(?:[\s\-\_])?jobs)/color('magenta') . $1 . color('reset')/ige;
-  $tweetTextShort =~ s/(david(?:[\s\-\_])?graeber)/color('yellow')  . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(climate(?:[\s\-])?change)/color('green')  . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(bullshit(?:[\s\-])?jobs)/color('magenta') . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(nonsense[\s\-]employment)/color('magenta') . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(david(?:[\s\-])?graeber)/color('yellow')  . $1 . color('reset')/ige;
   
   my $tweetTextShortPrint = $tweetTextShort;
   $tweetTextShortPrint =~ s/\R/\\/g;
