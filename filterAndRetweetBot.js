@@ -5,10 +5,10 @@
 //
 // TODO: API Error handling.
 // 
-var colors = require('colors')
-var Twit = require('twit')
-var config = require('./filterAndRetweetBotConfig.js')
-var T = new Twit(config)
+var colors = require('colors');
+var Twit = require('twit');
+var config = require('./filterAndRetweetBotConfig.js');
+var T = new Twit(config);
 
 //////////////
 // API call //
@@ -16,16 +16,18 @@ var T = new Twit(config)
 var stream = T.stream('statuses/filter', { track: 'climatechange, climate change, bullshitjobs, bullshit jobs, davidgraeber, david graeber' }); // the streaming app does not seem to support quoted search phrases
 
 stream.on('limit', function (limitMessage) {
-  console.log(JSON.stringify(limitMessage))
+  console.log(JSON.stringify(limitMessage));
 });
 
 stream.on('disconnect', function (disconnectMessage) {
-  console.log(JSON.stringify(disconnectMessage))
+  console.log(JSON.stringify(disconnectMessage));
 })
 
 stream.on('tweet', function (tweet) {
   
-   var tweetText = typeof tweet.extended_tweet !== 'undefined' ? tweet.extended_tweet.full_text : tweet.text;
+  var tweetText = typeof tweet.extended_tweet !== 'undefined' ? tweet.extended_tweet.full_text : tweet.text;
+  //tweetText = utf8.encode(tweetText);
+  tweetText = Buffer.from(tweetText, 'utf-8').toString();
 
   if(typeof tweet.retweeted_status !== 'undefined'){ return 1; }
   if(tweet.lang != 'en')                           { return 1; }
@@ -67,7 +69,7 @@ stream.on('tweet', function (tweet) {
     }  
 
     var tweetTextShort = tweetText.substr(0, 160);  
-    tweetTextShort = tweetTextShort.replace(usernamesRegex,     function(m){ return colors.cyan(m); });
+    tweetTextShort = tweetTextShort.replace(usernamesRegex,     function(m){ return colors.cyan(m);    });
     tweetTextShort = tweetTextShort.replace(hashTagRegex,       function(m){ return colors.cyan(m);    });
     tweetTextShort = tweetTextShort.replace(climateRegex1,      function(m){ return colors.green(m);   });
     tweetTextShort = tweetTextShort.replace(bullshitjobsRegex1, function(m){ return colors.magenta(m); });
@@ -79,7 +81,7 @@ stream.on('tweet', function (tweet) {
     var out  = '[' + tweet.created_at.cyan + '] ';
         out += reaction + ' | '
         out += tweetUrlPrint + ' '.repeat(64-tweetUrl.length) + ' | ';
-        out += ' '.repeat(16-tweet.user.screen_name.length) + tweet.user.screen_name + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
+        out += ' '.repeat(16-tweet.user.screen_name.length) + screenName + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
         out += tweetTextShortPrint;
     console.log(out);
     
