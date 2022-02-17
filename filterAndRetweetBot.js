@@ -14,7 +14,6 @@ var T = new Twit(config)
 // API call //
 //////////////
 var stream = T.stream('statuses/filter', { track: 'bullshitjobs, bullshit jobs, davidgraeber, david graeber' }); // the streaming app does not seem to support quoted search phrases
-//var stream = T.stream('statuses/filter', { track: '#bullshitjobs, bullshitjobs, "bullshit jobs", "bullshit-jobs", "bullshit_jobs", #davidgraeber, davidgraeber, "david graeber"' }); // this will use all the --->"<--- characters as part of the search phrase. :-(
 
 stream.on('limit', function (limitMessage) {
   console.log(JSON.stringify(limitMessage))
@@ -26,7 +25,7 @@ stream.on('disconnect', function (disconnectMessage) {
 
 stream.on('tweet', function (tweet) {
   
-  var tweetText = typeof tweet.extended_tweet !== 'undefined' ? tweet.extended_tweet.full_text : tweet.text;
+   var tweetText = typeof tweet.extended_tweet !== 'undefined' ? tweet.extended_tweet.full_text : tweet.text;
 
   if(typeof tweet.retweeted_status !== 'undefined'){ return 1; }
   if(tweet.lang != 'en')                           { return 1; }
@@ -34,64 +33,56 @@ stream.on('tweet', function (tweet) {
 
   // see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
   // see: https://github.com/twitter/twitter-text/tree/master/js
-  const usernamesRegex = new RegExp(/(^|[^\w@/\!?=&])@(\w{1,15})\b/, 'g');
-  var tweetTextNoUsers  = tweetText.replace(usernamesRegex, '');
+  const usernamesRegex     = new RegExp(/(^|[^\w@/\!?=&])@(\w{1,15})\b/, 'ig');
+  const hashTagRegex       = new RegExp(/(^|[^\w#/\!?=&])#(\w{1,15})\b/, 'ig');  
 
-  const bullshitjobsRegex1 = new RegExp(/#bullshitjobs/, 'i');
-  const bullshitjobsRegex2 = new RegExp(/bullshitjobs/, 'i');
-  const bullshitjobsRegex3 = new RegExp(/bullshit[\s\_\-]jobs/, 'i');
+  const climateRegex1      = new RegExp(/(climate(?:[\s\_\-])?change)/,  'ig');
+  const bullshitjobsRegex1 = new RegExp(/(bullshit(?:[\s\_\-])?jobs)/,   'ig');
+  const davidGraeberRegex1 = new RegExp(/(david(?:[\s\_\-])?graeber)/,   'ig');
   
-  const climateRegex1 = new RegExp(/#climatechange/, 'i');
-  const climateRegex2 = new RegExp(/climatechange/, 'i');
-  const climateRegex3 = new RegExp(/climate[\s\_\-]change/, 'i');
+  var tweetTextNoUsers = tweetText.replace(usernamesRegex, '');
   
-  const davidGraeberRegex1 = new RegExp(/#davidgraeber/, 'i');
-  const davidGraeberRegex2 = new RegExp(/davidgraeber/, 'i');
-  const davidGraeberRegex3 = new RegExp(/david[\s\_\-]graeber/, 'i');
- 
   var bullshitjobsMatches = 0;
-  if(bullshitjobsRegex1.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
-  if(bullshitjobsRegex2.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
-  if(bullshitjobsRegex3.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
- 
   var climateMatches      = 0;
-  if(climateRegex1.test(tweetTextNoUsers)){ climateMatches++; }
-  if(climateRegex2.test(tweetTextNoUsers)){ climateMatches++; }
-  if(climateRegex3.test(tweetTextNoUsers)){ climateMatches++; }
-  
   var davidGraeberMatches = 0;
+  if(     climateRegex1.test(tweetTextNoUsers)){      climateMatches++; }
+  if(bullshitjobsRegex1.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
   if(davidGraeberRegex1.test(tweetTextNoUsers)){ davidGraeberMatches++; }
-  if(davidGraeberRegex2.test(tweetTextNoUsers)){ davidGraeberMatches++; }
-  if(davidGraeberRegex3.test(tweetTextNoUsers)){ davidGraeberMatches++; }
-  
+
   if(bullshitjobsMatches > 0 || davidGraeberMatches > 0){
-  
+
     var tweetUrl      = 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
     var tweetUrlPrint = 'https://twitter.com/' + tweet.user.screen_name.magenta + '/status/' + tweet.id_str.yellow;
-    
-    var tweetTextShort = tweetText.substr(0, 160);
-    const newlineRegex = new RegExp(/\r?\n|\r/, 'g')
-    var tweetTextShortPrint = tweetTextShort.replace(newlineRegex, ' ');
-    
-    var screenName = tweet.user.screen_name;
-    if(tweet.user.verified){
-      screenName = screenName.yellow;
-    }
-    
+
     var reaction = 'NONE   ';
     if(bullshitjobsMatches > 0){
       reaction   = 'RETWEET'.magenta;
     }else if(davidGraeberMatches > 0){
       reaction   = 'LIKE   '.cyan;
     }
+  
+    var screenName = tweet.user.screen_name;
+    if(tweet.user.verified){
+      screenName = screenName.yellow;
+    }  
+
+    var tweetTextShort = tweetText.substr(0, 160);  
+    tweetTextShort = tweetTextShort.replace(usernamesRegex,     function(m){ return colors.magenta(m); });
+    tweetTextShort = tweetTextShort.replace(hashTagRegex,       function(m){ return colors.cyan(m);    });
+    tweetTextShort = tweetTextShort.replace(climateRegex1,      function(m){ return colors.green(m);   });
+    tweetTextShort = tweetTextShort.replace(bullshitjobsRegex1, function(m){ return colors.magenta(m); });
+    tweetTextShort = tweetTextShort.replace(davidGraeberRegex1, function(m){ return colors.yellow(m);  });
     
+    const newlineRegex = new RegExp(/\r?\n|\r/, 'g')
+    var tweetTextShortPrint = tweetTextShort.replace(newlineRegex, ' ');
+
     var out  = '[' + tweet.created_at.cyan + '] ';
         out += reaction + ' | '
         out += tweetUrlPrint + ' '.repeat(64-tweetUrl.length) + ' | ';
         out += ' '.repeat(16-tweet.user.screen_name.length) + tweet.user.screen_name + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
         out += tweetTextShortPrint;
     console.log(out);
-        
+    
     if(bullshitjobsMatches > 0){
       
       ///////////////

@@ -153,13 +153,13 @@ sub isaGoodTweet {
            
   # see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
   # see: https://github.com/twitter/twitter-text/tree/master/js      
-  $tweetTextShort =~ s/(^|[^\w@\/\!?=&])(@\w{1,15})\b/$1 . color('magenta') . $2 . color('reset')/ige;  # even more specific (testing)
-  #$tweetTextShort =~ s/(^|[^@\w])(@(?:\w{1,15}))\b/$1 . color('magenta') . $2 . color('reset')/ige;    # previous version
+  $tweetTextShort =~ s/(^|[^\w@\/\!?=&])(@\w{1,15})\b/$1 . color('magenta') . $2 . color('reset')/ige;
+  $tweetTextShort =~ s/(^^|[^\w#\/\!?=&])(#\w{1,15})\b/$1 . color('cyan') . $2 . color('reset')/ige;
   
-  $tweetTextShort =~ s/(^|[^#\w])(#(?:\w{1,128}))\b/$1 . color('cyan') . $2 . color('reset')/ige;
-  $tweetTextShort =~ s/(david[\s\-\_]graeber)/color('yellow') . $1 . color('reset')/ige;
-  $tweetTextShort =~ s/(bullshit[\s\-\_]jobs)/color('magenta') . $1 . color('reset')/ige;
-  $tweetTextShort =~ s/(bullshitjobs)/color('magenta') . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(climate(?:[\s\-\_])?change)/color('green')  . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(bullshit(?:[\s\-\_])?jobs)/color('magenta') . $1 . color('reset')/ige;
+  $tweetTextShort =~ s/(david(?:[\s\-\_])?graeber)/color('yellow')  . $1 . color('reset')/ige;
+  
   my $tweetTextShortPrint = $tweetTextShort;
   $tweetTextShortPrint =~ s/\R/ /g;
   
