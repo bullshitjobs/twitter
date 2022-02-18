@@ -104,7 +104,7 @@ stream.on('tweet', function (tweet) {
     ).cyan + '] ';
         out += reaction + ' | ';
         out += tweetUrlPrint + ' '.repeat(62-tweetUrl.length) + ' | ';
-        out += ' '.repeat(16-tweet.user.screen_name.length) + screenName + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
+        out += ' '.repeat(15-tweet.user.screen_name.length) + screenName + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
         out += tweetType + quotedStatus + ' | ';
         out += numberOfUsersMentioned.padStart(2, ' ') + ' | ';
         out += tweetTextShortPrint;

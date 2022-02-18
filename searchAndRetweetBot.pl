@@ -211,7 +211,7 @@ sub printTweet {
   print $retweetAgePrint . ' | ';
   print $tweetUrlPrint . ' 'x(62- length($tweetUrl)) . ' | ';
   print ' 'x(6 - length($tweet->{'retweet_count'})) . $retweetCount . ' | ' . ' 'x(6 - length($tweet->{'favorite_count'})) . $favoriteCount . ' | ';
-  print ' 'x(16 - length($tweet->{'user'}->{'screen_name'})) . $name . ' (' . ' 'x(8 - length($tweet->{'user'}->{'followers_count'})) . $tweet->{'user'}->{'followers_count'} . ') | ';
+  print ' 'x(15 - length($tweet->{'user'}->{'screen_name'})) . $name . ' (' . ' 'x(8 - length($tweet->{'user'}->{'followers_count'})) . $tweet->{'user'}->{'followers_count'} . ') | ';
   print $tweetType . $quotedStatus . ' | ';
   print ' 'x(2- length($numberOfUsersMentioned)) . $numberOfUsersMentioned . ' | ';
   print $tweetTextShortPrint;
