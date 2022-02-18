@@ -73,9 +73,11 @@ my $client = Twitter::API->new_with_traits(
 ### main loop ###
 #################
 
+my $tweetId2retweetTime = {};
+
 while(1){
 
-  my $tweetIds = searchForTweets($options);
+  my $potentialTweetIds = searchForTweets($options);
  
   #
   # The results from 'search/tweets' calls do not actually have the .retweeted field set. It's always false/0.
@@ -88,9 +90,10 @@ while(1){
   # See https://twittercommunity.com/t/why-favorited-is-always-false-in-twitter-search-api-1-1/31826
   #
 
-  my $tweetIdsToRetweet = filterRetweeted($tweetIds);
-  print dateTime() . ' Found ' . color('yellow') . scalar(keys(%{$tweetIds})) . color('reset') . ' potential tweets. Retweeting ' . color('yellow') . scalar(keys(%{$tweetIdsToRetweet})) . color('reset') . ' of them.' . "\n";
-  retweetAction($tweetIdsToRetweet);
+  my $notYetRetweetedIds = filterRetweeted($potentialTweetIds);
+  print dateTime() . ' Found ' . color('yellow') . scalar(keys(%{$potentialTweetIds})) . color('reset') . ' potential tweets. Retweeting ' . color('yellow') . scalar(keys(%{$notYetRetweetedIds})) . color('reset') . ' of them.' . "\n";
+  
+  retweetAction($notYetRetweetedIds);
   
   print dateTime() . ' Sleeping for ' . color('yellow') . $interval . color('reset') . ' seconds. (Next run sheduled for ' . dateTime(time() + $interval) . ')' . "\n";
   sleep($interval);
@@ -137,12 +140,34 @@ sub isaGoodTweet {
   my $tweetText = defined $tweet->{'retweeted_status'} ? $tweet->{'retweeted_status'}->{'full_text'} : $tweet->{'full_text'};  
   my $matches = 0;
   $matches++ if $tweetText =~ /bullshit(?:[\s\-])?jobs/i;
-  $matches++ if $tweetText =~ /nonsense[\s\-]employment/i;
-  
+  $matches++ if $tweetText =~ /nonsense[\s\-]employment/i; 
   return 0 if $matches < 1;
+ 
+  return 1;
+}
 
-  # We found a potential tweet!
+sub printTweet {
+  my $tweet = shift;
+  
   my $unixTime = str2time($tweet->{'created_at'});
+  
+  my $retweetAge = defined $tweetId2retweetTime->{$tweet->{'id_str'}} ? time() - $tweetId2retweetTime->{$tweet->{'id_str'}} : undef;
+  
+  my $retweetAgePrint = '  OLD';
+  
+  if(JSON::is_bool($tweet->{'retweeted'}) && $tweet->{'retweeted'} == JSON::false){
+    $retweetAgePrint = ' ' . color('red') . 'PEND' . color('reset');
+  }elsif(defined $retweetAge){
+    my $retweetAgeHours = int($retweetAge / 3600);
+    my $color = 'green';
+    if($retweetAgeHours < 7){
+       $color = 'yellow';
+    }elsif($retweetAgeHours < 1){
+       $color = 'red';
+    }
+    $retweetAgePrint = ' 'x(4 - length($retweetAgeHours)) . color($color) . $retweetAgeHours . color('reset') . 'h';
+  }
+
   my $tweetUrl      = 'https://twitter.com/' . $tweet->{'user'}->{'screen_name'} . '/status/' . $tweet->{'id_str'};
   my $tweetUrlPrint = 'https://twitter.com/'. color('magenta') . $tweet->{'user'}->{'screen_name'} . color('reset') . '/status/' .  color('yellow') . $tweet->{'id_str'} .  color('reset');
   
@@ -165,7 +190,9 @@ sub isaGoodTweet {
 
   my $numberOfUsersMentioned = scalar(@{$tweet->{'entities'}->{'user_mentions'}});
 
-  my $tweetTextShort = substr($tweetText, 0, 155);
+  #my $tweetText = defined $tweet->{'retweeted_status'} ? $tweet->{'retweeted_status'}->{'full_text'} : $tweet->{'full_text'};  
+  my $tweetText = $tweet->{'text'};
+  my $tweetTextShort = substr($tweetText, 0, 146);
            
   # see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
   # see: https://github.com/twitter/twitter-text/tree/master/js      
@@ -181,22 +208,21 @@ sub isaGoodTweet {
   $tweetTextShortPrint =~ s/\R/\\/g;
   
   print '[' . color('cyan') . scalar(localtime($unixTime)) . color('reset') . '] ';
-  print $tweetUrlPrint . ' 'x(64- length($tweetUrl)) . ' | ';
+  print $retweetAgePrint . ' | ';
+  print $tweetUrlPrint . ' 'x(62- length($tweetUrl)) . ' | ';
   print 'R: ' . ' 'x(8 - length($tweet->{'retweet_count'})) . $retweetCount . ' L:' . ' 'x(8 - length($tweet->{'favorite_count'})) . $favoriteCount . ' | ';
   print ' 'x(16 - length($tweet->{'user'}->{'screen_name'})) . $name . ' (' . ' 'x(8 - length($tweet->{'user'}->{'followers_count'})) . $tweet->{'user'}->{'followers_count'} . ') | ';
   print $tweetType . $quotedStatus . ' | ';
   print ' 'x(2- length($numberOfUsersMentioned)) . $numberOfUsersMentioned . ' | ';
   print $tweetTextShortPrint;
   print "\n";
-  
-  return 1;
 }
 
 sub filterRetweeted {
   my $ids = shift;
   my $filteredIds = {};
 
-  my @ids = keys %{$ids};
+  my @ids = sort {$a <=> $b} keys %{$ids};
   my $spliceSize = 50;
   do{
     my @tmp = splice(@ids, 0, $spliceSize);
@@ -204,11 +230,14 @@ sub filterRetweeted {
     ################
     ### API call ###
     ################
-    my $chunk = $client->get('statuses/lookup', { trim_user => 1, id => join(',', @tmp) });
+    #my $chunk = $client->get('statuses/lookup', { trim_user => 1, id => join(',', @tmp) });
+    #  tweet_mode => 'extended' not really needed for tweetPrint ...
+    my $chunk = $client->get('statuses/lookup', { id => join(',', @tmp) });
     sleep(5); # Don't hammer the API ...
-    
-    foreach my $tweet (@{$chunk}){
+
+    foreach my $tweet (sort { $a->{'id_str'} <=> $b->{'id_str'} } @{$chunk}){
       $filteredIds->{$tweet->{'id_str'}}++ if JSON::is_bool($tweet->{'retweeted'}) && $tweet->{'retweeted'} == JSON::false;
+      printTweet($tweet);
     }
   } while(scalar @ids > 0);
   return $filteredIds;
@@ -225,6 +254,7 @@ sub retweetAction {
     my $chunk = $client->post('statuses/retweet/' . $id);
     sleep(5); # Don't hammer the API ...
     
+    $tweetId2retweetTime->{$id} = time();
   }
 }
 

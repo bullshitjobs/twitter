@@ -57,11 +57,11 @@ stream.on('tweet', function (tweet) {
     const unixTime = Date.parse(tweet.created_at);
     const dateObject = new Date(unixTime);
 
-    var reaction = 'NONE   ';
+    var reaction = '   NONE';
     if(bullshitjobsMatches > 0){
       reaction   = 'RETWEET'.magenta;
     }else if(davidGraeberMatches > 0){
-      reaction   = 'LIKE   '.cyan;
+      reaction   = '   LIKE'.cyan;
     }
 
     var tweetUrl      = 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
@@ -103,7 +103,7 @@ stream.on('tweet', function (tweet) {
       }
     ).cyan + '] ';
         out += reaction + ' | ';
-        out += tweetUrlPrint + ' '.repeat(64-tweetUrl.length) + ' | ';
+        out += tweetUrlPrint + ' '.repeat(62-tweetUrl.length) + ' | ';
         out += ' '.repeat(16-tweet.user.screen_name.length) + screenName + ' (' + String(tweet.user.followers_count).padStart(8, ' ') + ') | ';
         out += tweetType + quotedStatus + ' | ';
         out += numberOfUsersMentioned.padStart(2, ' ') + ' | ';
