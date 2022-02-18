@@ -153,7 +153,7 @@ sub printTweet {
   
   my $retweetAge = defined $tweetId2retweetTime->{$tweet->{'id_str'}} ? time() - $tweetId2retweetTime->{$tweet->{'id_str'}} : undef;
   
-  my $retweetAgePrint = '  OLD';
+  my $retweetAgePrint = ' RTed';
   
   if(JSON::is_bool($tweet->{'retweeted'}) && $tweet->{'retweeted'} == JSON::false){
     $retweetAgePrint = ' ' . color('red') . 'PEND' . color('reset');
@@ -210,7 +210,7 @@ sub printTweet {
   print '[' . color('cyan') . scalar(localtime($unixTime)) . color('reset') . '] ';
   print $retweetAgePrint . ' | ';
   print $tweetUrlPrint . ' 'x(62- length($tweetUrl)) . ' | ';
-  print 'R: ' . ' 'x(8 - length($tweet->{'retweet_count'})) . $retweetCount . ' L:' . ' 'x(8 - length($tweet->{'favorite_count'})) . $favoriteCount . ' | ';
+  print ' 'x(6 - length($tweet->{'retweet_count'})) . $retweetCount . ' | ' . ' 'x(6 - length($tweet->{'favorite_count'})) . $favoriteCount . ' | ';
   print ' 'x(16 - length($tweet->{'user'}->{'screen_name'})) . $name . ' (' . ' 'x(8 - length($tweet->{'user'}->{'followers_count'})) . $tweet->{'user'}->{'followers_count'} . ') | ';
   print $tweetType . $quotedStatus . ' | ';
   print ' 'x(2- length($numberOfUsersMentioned)) . $numberOfUsersMentioned . ' | ';
