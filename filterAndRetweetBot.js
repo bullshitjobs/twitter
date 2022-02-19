@@ -13,7 +13,7 @@ var T = new Twit(config);
 //////////////
 // API call //
 //////////////
-var stream = T.stream('statuses/filter', { track: 'climatechange, climate change, bullshitjobs, bullshit jobs, nonsense employment, davidgraeber, david graeber' }); // the streaming app does not seem to support quoted search phrases
+var stream = T.stream('statuses/filter', { track: 'climatechange, climate change, bullshitjobs, bullshit jobs, nonsense employment, davidgraeber, david graeber, basicincome, basic income' }); // the streaming app does not seem to support quoted search phrases
 
 stream.on('limit', function (limitMessage) {
   console.log(JSON.stringify(limitMessage));
@@ -34,25 +34,28 @@ stream.on('tweet', function (tweet) {
 
   // see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
   // see: https://github.com/twitter/twitter-text/tree/master/js
-  const usernamesRegex     = new RegExp(/(^|[^\w@/\!?=&])@(\w{1,15})\b/, 'ig');
-  const hashTagRegex       = new RegExp(/(^|[^\w#/\!?=&])#(\w{1,15})\b/, 'ig');  
+  const     usernamesRegex = new RegExp(/(^|[^\w@/\!?=&])@(\w{1,15})\b/, 'ig');
+  const       hashTagRegex = new RegExp(/(^|[^\w#/\!?=&])#(\w{1,15})\b/, 'ig');
 
-  const climateRegex1      = new RegExp(/(climate(?:[\s\-])?change)/,  'ig');
+  const      climateRegex1 = new RegExp(/(climate(?:[\s\-])?change)/,  'ig');
   const bullshitjobsRegex1 = new RegExp(/(bullshit(?:[\s\-])?jobs)/,   'ig');
   const bullshitjobsRegex2 = new RegExp(/(nonsense[\s\-]employment)/,  'ig');
   const davidGraeberRegex1 = new RegExp(/(david(?:[\s\-])?graeber)/,   'ig');
+  const  basicincomeRegex1 = new RegExp(/(basic[\s\-]income)/,  'ig');
   
   var tweetTextNoUsers = tweetText.replace(usernamesRegex, '');
   
   var bullshitjobsMatches = 0;
-  var climateMatches      = 0;
+  var      climateMatches = 0;
   var davidGraeberMatches = 0;
+  var  basicincomeMatches = 0;
   if(     climateRegex1.test(tweetTextNoUsers)){      climateMatches++; }
   if(bullshitjobsRegex1.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
   if(bullshitjobsRegex2.test(tweetTextNoUsers)){ bullshitjobsMatches++; }
   if(davidGraeberRegex1.test(tweetTextNoUsers)){ davidGraeberMatches++; }
+  if( basicincomeRegex1.test(tweetTextNoUsers)){  basicincomeMatches++; }
 
-  if(bullshitjobsMatches > 0 || davidGraeberMatches > 0 || climateMatches > 0){
+  if(bullshitjobsMatches > 0 || davidGraeberMatches > 0 || climateMatches > 0 || basicincomeMatches > 0){
 
     const unixTime = Date.parse(tweet.created_at);
     const dateObject = new Date(unixTime);
@@ -86,12 +89,13 @@ stream.on('tweet', function (tweet) {
     var numberOfUsersMentioned = tweet.entities.user_mentions.length.toString();
 
     var tweetTextShort = tweetText.substr(0, 185);
-    tweetTextShort = tweetTextShort.replace(usernamesRegex,     function(m){ return colors.cyan(m);    });
-    tweetTextShort = tweetTextShort.replace(hashTagRegex,       function(m){ return colors.cyan(m);    });
-    tweetTextShort = tweetTextShort.replace(climateRegex1,      function(m){ return colors.green(m);   });
+    tweetTextShort = tweetTextShort.replace(    usernamesRegex, function(m){ return colors.cyan(m);    });
+    tweetTextShort = tweetTextShort.replace(      hashTagRegex, function(m){ return colors.cyan(m);    });
+    tweetTextShort = tweetTextShort.replace(     climateRegex1, function(m){ return colors.green(m);   });
     tweetTextShort = tweetTextShort.replace(bullshitjobsRegex1, function(m){ return colors.magenta(m); });
     tweetTextShort = tweetTextShort.replace(bullshitjobsRegex2, function(m){ return colors.magenta(m); });
     tweetTextShort = tweetTextShort.replace(davidGraeberRegex1, function(m){ return colors.yellow(m);  });
+    tweetTextShort = tweetTextShort.replace( basicincomeRegex1, function(m){ return colors.red(m);     });
     
     const newlineRegex = new RegExp(/\r?\n|\r/, 'g')
     var tweetTextShortPrint = tweetTextShort.replace(newlineRegex, '\\');
