@@ -63,6 +63,7 @@ stream.on('tweet', function (tweet) {
     var reaction = '   NONE';
     if(bullshitjobsMatches > 0){
       reaction   = 'RETWEET'.magenta;
+    //}else if(davidGraeberMatches > 0 || basicincomeMatches > 0){
     }else if(davidGraeberMatches > 0){
       reaction   = '   LIKE'.cyan;
     }
@@ -133,6 +134,7 @@ stream.on('tweet', function (tweet) {
       // </retweet> //
       ////////////////
       
+    //}else if(davidGraeberMatches > 0 || basicincomeMatches > 0){
     }else if(davidGraeberMatches > 0){
       
       ////////////
