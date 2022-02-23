@@ -10,6 +10,14 @@ var Twit = require('twit');
 var config = require('./filterAndRetweetBotConfig.js');
 var T = new Twit(config);
 
+var ignoreRepliesBy = {
+  '3308920474': 'bullshitjobs',
+}
+
+var ignoreEverythingBy = {
+  '65493023': 'SarahPalinUSA',
+}
+
 //////////////
 // API call //
 //////////////
@@ -60,12 +68,22 @@ stream.on('tweet', function (tweet) {
     const unixTime = Date.parse(tweet.created_at);
     const dateObject = new Date(unixTime);
 
+    var boolRetweet = false;
+    var boolLike = false;
+    
     var reaction = '   NONE';
-    if(bullshitjobsMatches > 0){
-      reaction   = 'RETWEET'.magenta;
+    
+    if(tweet.user.id_str in ignoreEverythingBy){
+    	reaction = ' IGNORE';
+    }else if(tweet.in_reply_to_status_id_str !== null && tweet.user.id_str in ignoreRepliesBy){
+      reaction = ' IGNORE';
+    }else if(bullshitjobsMatches > 0){
+      boolRetweet = true;
+      reaction    = 'RETWEET'.magenta;
     //}else if(davidGraeberMatches > 0 || basicincomeMatches > 0){
     }else if(davidGraeberMatches > 0){
-      reaction   = '   LIKE'.cyan;
+      boolLike = true;
+      reaction = '   LIKE'.cyan;
     }
 
     var tweetUrl      = 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
@@ -115,11 +133,9 @@ stream.on('tweet', function (tweet) {
         out += tweetTextShortPrint;
     console.log(out);
     
-    if(bullshitjobsMatches > 0){
-      
-      ///////////////
-      // <retweet> //
-      
+    ///////////////
+    // <retweet> //    
+    if(boolRetweet){
       //////////////
       // API call //
       //////////////
@@ -131,15 +147,13 @@ stream.on('tweet', function (tweet) {
           //console.log('Success: ' + tweet.id_str);
         }
       }
-      // </retweet> //
-      ////////////////
-      
-    //}else if(davidGraeberMatches > 0 || basicincomeMatches > 0){
-    }else if(davidGraeberMatches > 0){
-      
-      ////////////
-      // <like> //
+    }
+    // </retweet> //
+    ////////////////
 
+    ////////////
+    // <like> //    
+    if(boolLike){
       ///////////////
       /// API call //
       ///////////////
@@ -153,10 +167,9 @@ stream.on('tweet', function (tweet) {
           //console.log('Success: ' + tweet.id_str);
         }
       }
-      // </like> //
-      /////////////
-    
     }
+    // </like> //
+    /////////////
 
   }
 })
