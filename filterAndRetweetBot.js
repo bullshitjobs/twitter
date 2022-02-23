@@ -10,6 +10,10 @@ var Twit = require('twit');
 var config = require('./filterAndRetweetBotConfig.js');
 var T = new Twit(config);
 
+////////////
+// CONFIG //
+////////////
+
 var ignoreRepliesBy = {
   '3308920474': 'bullshitjobs',
 }
@@ -18,10 +22,13 @@ var ignoreEverythingBy = {
   '65493023': 'SarahPalinUSA',
 }
 
+var        track = 'climatechange, climate change, bullshitjobs, bullshit jobs, nonsense employment, davidgraeber, david graeber, basicincome, basic income'; // the streaming app does not seem to support quoted search phrases
+var minFollowers = 2000;
+
 //////////////
 // API call //
 //////////////
-var stream = T.stream('statuses/filter', { track: 'climatechange, climate change, bullshitjobs, bullshit jobs, nonsense employment, davidgraeber, david graeber, basicincome, basic income' }); // the streaming app does not seem to support quoted search phrases
+var stream = T.stream('statuses/filter', { track: track}); 
 
 stream.on('limit', function (limitMessage) {
   console.log(JSON.stringify(limitMessage));
@@ -38,7 +45,7 @@ stream.on('tweet', function (tweet) {
 
   if(typeof tweet.retweeted_status !== 'undefined'){ return 1; }
   if(tweet.lang != 'en')                           { return 1; }
-  if(tweet.user.followers_count < 2000)            { return 1; }
+  if(tweet.user.followers_count < minFollowers)            { return 1; }
 
   // see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
   // see: https://github.com/twitter/twitter-text/tree/master/js
