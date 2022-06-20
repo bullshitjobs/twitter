@@ -27,18 +27,60 @@ my $twitterUser   = undef;
 my $min_retweets  = undef;
 my $min_favorites = undef;
 
+my $ignoreEverythingBy = {
+
+             '14446807' => 'thatinterlace',
+             '14617332' => 'figgityfigs',
+             '65493023' => 'SarahPalinUSA',
+             '88174963' => 'csdrake',
+            '136080626' => 'golikehellmachi',            
+            '187719856' => 'draglikepull',
+            '319988364' => 'AlexGodofsky',         
+            '397782926' => 'hillelogram',
+            '398413123' => 'cojobrien',
+            '410151321' => 'Chican3ry',
+            '599755262' => 'blairreeves',
+            '823328503' => 'matthewdownhour',
+            '892767878' => 'nikicaga',
+            '896384784' => 'StephenPiment',
+           '1254412448' => 'BeijingPalmer',
+           '2725273267' => 'alth0u',
+           '2900768928' => 'provisionalidea',
+           '3315205122' => 'deepfates',
+           '3419028987' => 'sgodofsk',                    
+   '767323848161320965' => 'MonniauxD',
+   '791112163507044353' => 'astratelates',
+  '1019515949450514432' => 'gfmindset',
+  '1237544283743432704' => 'powerbottomdad1',
+  '1320344445288632321' => 'metakuna',
+  '1352845902113869824' => 'CJackson818',
+  '1364159160267530241' => 'linmanuelrwanda',
+  '1418495302168891393' => 'tweets_of_oscar',
+  '1431830721635753990' => 'lawyerbrandy',
+  '1481645017726799888' => 'MonetaristMaia',
+
+};
+
 ###########################################
 ### configure your search profiles here ###
 ###########################################
 
-if($profile eq 'pop'){
-  $twitterUser   = 'bullshitjobspop';
+if($profile eq 'bot'){
+  $twitterUser   = 'bullshitjobsbot';
   $min_retweets  = 10;
   $min_favorites = 10;
+}elsif($profile eq 'pop'){
+  $twitterUser   = 'bullshitjobspop';
+  $min_retweets  = 25;
+  $min_favorites = 25;
 }elsif($profile eq 'top'){
   $twitterUser   = 'bullshitjobstop';
   $min_retweets  = 100;
   $min_favorites = 100;
+}elsif($profile eq 'int'){
+  $twitterUser   = 'bullshitjobsint';
+  $min_retweets  = 10;
+  $min_favorites = 10;
 }else{
   die dateTime() . ' Unknown profile "' . $profile . '" specified via the --profile command line option: ' . $profile . '. Aborting ...' . "\n";
 }
@@ -64,8 +106,10 @@ my $credentials = do('./searchAndRetweetBotConfig.pl');
 die dateTime() . ' No credentials found for user: ' . $twitterUser . '. Aborting ...' . "\n" if !defined $credentials->{$twitterUser};
 $credentials = $credentials->{$twitterUser};
 
+# see https://metacpan.org/pod/Twitter::API::Trait::RetryOnError
+# see https://metacpan.org/pod/Twitter::API::Trait::Enchilada
 my $client = Twitter::API->new_with_traits(
-  traits => [ qw/ApiMethods NormalizeBooleans/ ],
+  traits => [ qw/ApiMethods NormalizeBooleans RetryOnError/ ],
   %{$credentials},
 );
  
@@ -132,15 +176,21 @@ sub searchForTweets {
 sub isaGoodTweet {
   my $tweet = shift;
   
+  return 0 if defined $ignoreEverythingBy->{$tweet->{'user'}->{'id_str'}};
   return 0 if $tweet->{'retweet_count'} < $min_retweets && $tweet->{'favorite_count'} < $min_favorites;
   return 0 if defined $tweet->{'retweeted_status'};
   ###return 0 if defined $tweet->{'in_reply_to_status_id_str'}; ###testing <-----------------------------------------------------------------------------------------------------------------
-  return 0 if $tweet->{'lang'} ne 'en';
+  
+  # make more beautiful ......................
+  return 0 if $tweet->{'lang'} ne 'en' && $profile ne 'int';
+  return 0 if $tweet->{'lang'} eq 'en' && $profile eq 'int';
   
   my $tweetText = defined $tweet->{'retweeted_status'} ? $tweet->{'retweeted_status'}->{'full_text'} : $tweet->{'full_text'};  
+  my $tweetTextNoUsers = $tweetText =~ s/(^|[^\w@\/\!?=&])(@\w{1,15})\b//igr; # in perl 5.14.0 or later, you can use the new /r non-destructive substitution modifier.
+  
   my $matches = 0;
-  $matches++ if $tweetText =~ /bullshit(?:[\s\-])?jobs/i;
-  $matches++ if $tweetText =~ /nonsense[\s\-]employment/i; 
+  $matches++ if $tweetTextNoUsers =~ /bullshit(?:[\s\-])?jobs/i;
+  $matches++ if $tweetTextNoUsers =~ /nonsense[\s\-]employment/i; 
   return 0 if $matches < 1;
  
   return 1;
@@ -193,7 +243,7 @@ sub printTweet {
   #my $tweetText = defined $tweet->{'retweeted_status'} ? $tweet->{'retweeted_status'}->{'full_text'} : $tweet->{'full_text'};  
   my $tweetText = $tweet->{'text'};
   my $tweetTextShort = substr($tweetText, 0, 146);
-           
+  
   # see: https://stackoverflow.com/questions/2304632/regex-for-twitter-username#comment81834127_13396934
   # see: https://github.com/twitter/twitter-text/tree/master/js      
   $tweetTextShort =~ s/(^|[^\w@\/\!?=&])(@\w{1,15})\b/$1 .  color('cyan') . $2 . color('reset')/ige;
