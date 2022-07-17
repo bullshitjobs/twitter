@@ -52,12 +52,15 @@ my $ignoreEverythingBy = {
    '791112163507044353' => 'astratelates',
   '1019515949450514432' => 'gfmindset',
   '1237544283743432704' => 'powerbottomdad1',
+  '1309216162018807808' => 'sheslostheplot',
   '1320344445288632321' => 'metakuna',
   '1352845902113869824' => 'CJackson818',
   '1364159160267530241' => 'linmanuelrwanda',
+  '1400255374985515008' => 'johnny09759600', # posting nonsense
   '1418495302168891393' => 'tweets_of_oscar',
   '1431830721635753990' => 'lawyerbrandy',
   '1481645017726799888' => 'MonetaristMaia',
+  
 
 };
 
