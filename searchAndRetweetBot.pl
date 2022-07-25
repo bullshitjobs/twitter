@@ -74,14 +74,30 @@ if($profile eq 'bot'){
   $min_favorites = 10;
 }elsif($profile eq 'pop'){
   $twitterUser   = 'bullshitjobspop';
-  $min_retweets  = 25;
-  $min_favorites = 25;
-}elsif($profile eq 'top'){
-  $twitterUser   = 'bullshitjobstop';
   $min_retweets  = 100;
   $min_favorites = 100;
+}elsif($profile eq 'top'){
+  $twitterUser   = 'bullshitjobstop';
+  $min_retweets  = 1000;
+  $min_favorites = 1000;
+}elsif($profile eq 'omg'){
+  $twitterUser   = 'bullshitjobsomg';
+  $min_retweets  = 10000;
+  $min_favorites = 10000;
 }elsif($profile eq 'int'){
   $twitterUser   = 'bullshitjobsint';
+  $min_retweets  = 10;
+  $min_favorites = 10;
+}elsif($profile eq 'de'){
+  $twitterUser   = 'bullshitjobsde';
+  $min_retweets  = 10;
+  $min_favorites = 10;
+}elsif($profile eq 'fr'){
+  $twitterUser   = 'bullshitjobsfr';
+  $min_retweets  = 10;
+  $min_favorites = 10;
+}elsif($profile eq 'nl'){
+  $twitterUser   = 'bullshitjobsnl';
   $min_retweets  = 10;
   $min_favorites = 10;
 }else{
@@ -185,8 +201,25 @@ sub isaGoodTweet {
   ###return 0 if defined $tweet->{'in_reply_to_status_id_str'}; ###testing <-----------------------------------------------------------------------------------------------------------------
   
   # make more beautiful ......................
-  return 0 if $tweet->{'lang'} ne 'en' && $profile ne 'int';
-  return 0 if $tweet->{'lang'} eq 'en' && $profile eq 'int';
+  
+  if($profile eq 'de'){
+    return 0 if $tweet->{'lang'} ne 'de';
+  }elsif($profile eq 'fr'){
+    return 0 if $tweet->{'lang'} ne 'fr';
+  }elsif($profile eq 'nl'){
+    return 0 if $tweet->{'lang'} ne 'nl';
+  }elsif($profile eq 'int'){
+  	return 0 if $tweet->{'lang'} eq 'en';
+  	return 0 if $tweet->{'lang'} eq 'de';
+  	return 0 if $tweet->{'lang'} eq 'fr';
+  	return 0 if $tweet->{'lang'} eq 'nl';
+  # EN / DEFAULT
+  }else{
+    return 0 if $tweet->{'lang'} ne 'en';
+  }
+  	
+  #return 0 if $tweet->{'lang'} ne 'en' && $profile ne 'int';
+  #return 0 if $tweet->{'lang'} eq 'en' && $profile eq 'int';
   
   my $tweetText = defined $tweet->{'retweeted_status'} ? $tweet->{'retweeted_status'}->{'full_text'} : $tweet->{'full_text'};  
   my $tweetTextNoUsers = $tweetText =~ s/(^|[^\w@\/\!?=&])(@\w{1,15})\b//igr; # in perl 5.14.0 or later, you can use the new /r non-destructive substitution modifier.
